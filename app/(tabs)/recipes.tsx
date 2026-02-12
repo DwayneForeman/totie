@@ -690,12 +690,7 @@ IMPORTANT:
     }
   }, [processSnapImage]);
 
-  const handleSnapCraving = useCallback(() => {
-    if (!isPremium) {
-      setPaywallFeatureName('Screenshot → DIY recipe');
-      setShowPremiumPaywall(true);
-      return;
-    }
+  const launchSnapCraving = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (Platform.OS === 'web') {
       pickImage('library');
@@ -711,6 +706,15 @@ IMPORTANT:
       );
     }
   }, [pickImage]);
+
+  const handleSnapCraving = useCallback(() => {
+    if (!isPremium) {
+      setPaywallFeatureName('Screenshot \u2192 DIY recipe');
+      setShowPremiumPaywall(true);
+      return;
+    }
+    launchSnapCraving();
+  }, [isPremium, launchSnapCraving]);
 
   const closeAddIdea = useCallback(() => {
     setShowAddIdea(false);
@@ -2802,6 +2806,13 @@ IMPORTANT:
       <PremiumPaywall
         visible={showPremiumPaywall}
         onClose={() => setShowPremiumPaywall(false)}
+        onPurchaseSuccess={() => {
+          console.log('[Recipes] Purchase success \u2014 feature:', paywallFeatureName);
+          setShowPremiumPaywall(false);
+          if (paywallFeatureName === 'Screenshot \u2192 DIY recipe') {
+            setTimeout(() => launchSnapCraving(), 300);
+          }
+        }}
         featureName={paywallFeatureName}
       />
     </View>

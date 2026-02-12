@@ -1718,6 +1718,7 @@ Keep instructions clear and beginner-friendly.`
           }
         }}
         onPurchaseSuccess={() => {
+          console.log('[CookNow] Purchase success — closing paywall, staying on page');
           setShowPremiumPaywall(false);
         }}
         featureName="Cook Now"

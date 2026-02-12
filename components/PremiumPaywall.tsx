@@ -176,8 +176,12 @@ export default function PremiumPaywall({ visible, onClose, onPurchaseSuccess, fe
       if (isRescue) {
         await markRescuePaywallSeen();
       }
-      onClose();
-      onPurchaseSuccess?.();
+      console.log('[Paywall] Purchase successful, calling onPurchaseSuccess');
+      if (onPurchaseSuccess) {
+        onPurchaseSuccess();
+      } else {
+        onClose();
+      }
     }
   };
 
@@ -187,8 +191,12 @@ export default function PremiumPaywall({ visible, onClose, onPurchaseSuccess, fe
     
     if (hasPremium) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      onClose();
-      onPurchaseSuccess?.();
+      console.log('[Paywall] Restore successful, calling onPurchaseSuccess');
+      if (onPurchaseSuccess) {
+        onPurchaseSuccess();
+      } else {
+        onClose();
+      }
     }
   };
 

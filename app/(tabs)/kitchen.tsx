@@ -160,6 +160,7 @@ export default function KitchenTab() {
   const [showPremiumPaywall, setShowPremiumPaywall] = useState(false);
   const [paywallFeatureName, setPaywallFeatureName] = useState<string | undefined>(undefined);
   const [pendingScanSource, setPendingScanSource] = useState<'camera' | 'gallery' | null>(null);
+  const premiumBypassRef = useRef(false);
   const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessingVoice, setIsProcessingVoice] = useState(false);
@@ -327,12 +328,13 @@ export default function KitchenTab() {
 
 
   const processImage = useCallback(async (source: 'camera' | 'gallery') => {
-    if (!isPremium) {
+    if (!isPremium && !premiumBypassRef.current) {
       setPendingScanSource(source);
       setPaywallFeatureName('AI fridge scanning');
       setShowPremiumPaywall(true);
       return;
     }
+    premiumBypassRef.current = false;
     try {
       const permResult = source === 'camera'
         ? await ImagePicker.requestCameraPermissionsAsync()
@@ -389,7 +391,7 @@ export default function KitchenTab() {
     } finally {
       setIsProcessingScan(false);
     }
-  }, []);
+  }, [isPremium]);
 
   const handleCameraScan = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -1646,9 +1648,12 @@ export default function KitchenTab() {
           setPendingScanSource(null);
         }}
         onPurchaseSuccess={() => {
+          console.log('[Kitchen] Purchase success \u2014 retrying scan');
+          setShowPremiumPaywall(false);
           if (pendingScanSource) {
             const source = pendingScanSource;
             setPendingScanSource(null);
+            premiumBypassRef.current = true;
             setTimeout(() => processImage(source), 300);
           }
         }}

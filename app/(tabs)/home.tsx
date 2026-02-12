@@ -507,6 +507,15 @@ export default function HomeTab() {
         <PremiumPaywall
           visible={showPremiumPaywall}
           onClose={() => setShowPremiumPaywall(false)}
+          onPurchaseSuccess={() => {
+            console.log('[Home] Purchase success — navigating to feature:', paywallFeatureName);
+            setShowPremiumPaywall(false);
+            if (paywallFeatureName === 'Cook Now') {
+              router.push('/cook-now');
+            } else if (paywallFeatureName === 'Screenshot → DIY recipe') {
+              router.push('/recipes?openAdd=craving');
+            }
+          }}
           featureName={paywallFeatureName}
         />
       </SafeAreaView>
