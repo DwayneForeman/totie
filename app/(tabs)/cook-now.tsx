@@ -1131,6 +1131,8 @@ Keep instructions clear and beginner-friendly.`
           </ScrollView>
         </SafeAreaView>
 
+        {renderAIRecipeModal()}
+
         <PageCoachMarks
           visible={showPageTutorial}
           onComplete={() => {
