@@ -1309,9 +1309,17 @@ IMPORTANT:
             contentContainerStyle={styles.cleanEmptyContent}
             showsVerticalScrollIndicator={false}
           >
-            <View style={styles.cleanEmptyHero}>
-              <Text style={styles.cleanEmptyTitle}>Your Recipe Collection</Text>
-              <Text style={styles.cleanEmptySubtitle}>
+            <View style={styles.heroCard}>
+              <View style={styles.heroGlow} />
+              <Animated.View style={[styles.heroMascotWrap, { transform: [{ scale: pulseAnim }] }]}>
+                <Image
+                  source={{ uri: 'https://r2-pub.rork.com/attachments/7kh2kny7y4aoan2iczpas' }}
+                  style={styles.heroMascot}
+                  resizeMode="contain"
+                />
+              </Animated.View>
+              <Text style={styles.heroTitle}>Your Recipe Collection</Text>
+              <Text style={styles.heroSubtitle}>
                 Save recipes from links, cookbooks, or create them with AI
               </Text>
             </View>
@@ -1570,9 +1578,17 @@ IMPORTANT:
             contentContainerStyle={styles.cleanEmptyContent}
             showsVerticalScrollIndicator={false}
           >
-            <View style={styles.cleanEmptyHero}>
-              <Text style={styles.cleanEmptyTitle}>Your Recipe Collection</Text>
-              <Text style={styles.cleanEmptySubtitle}>
+            <View style={styles.heroCard}>
+              <View style={styles.heroGlow} />
+              <Animated.View style={[styles.heroMascotWrap, { transform: [{ scale: pulseAnim }] }]}>
+                <Image
+                  source={{ uri: 'https://r2-pub.rork.com/attachments/7kh2kny7y4aoan2iczpas' }}
+                  style={styles.heroMascot}
+                  resizeMode="contain"
+                />
+              </Animated.View>
+              <Text style={styles.heroTitle}>Your Recipe Collection</Text>
+              <Text style={styles.heroSubtitle}>
                 Save recipes from links, cookbooks, or create them with AI
               </Text>
             </View>
@@ -4754,7 +4770,50 @@ const styles = StyleSheet.create({
   },
   cleanEmptyContent: {
     paddingHorizontal: 20,
-    paddingTop: 24,
+    paddingTop: 12,
+  },
+  heroCard: {
+    alignItems: 'center' as const,
+    backgroundColor: '#FFF8F4',
+    borderRadius: 24,
+    paddingTop: 28,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+    marginBottom: 20,
+    overflow: 'hidden' as const,
+    position: 'relative' as const,
+  },
+  heroGlow: {
+    position: 'absolute' as const,
+    top: '15%' as const,
+    width: 160,
+    height: 160,
+    borderRadius: 80,
+    backgroundColor: 'rgba(255,107,53,0.08)',
+  },
+  heroMascotWrap: {
+    width: 100,
+    height: 100,
+    marginBottom: 14,
+  },
+  heroMascot: {
+    width: '100%' as const,
+    height: '100%' as const,
+  },
+  heroTitle: {
+    fontSize: 22,
+    fontWeight: '800' as const,
+    color: colors.text,
+    letterSpacing: -0.3,
+    marginBottom: 4,
+    textAlign: 'center' as const,
+  },
+  heroSubtitle: {
+    fontSize: 14,
+    fontWeight: '500' as const,
+    color: colors.textSecondary,
+    textAlign: 'center' as const,
+    lineHeight: 20,
   },
   cleanEmptyHero: {
     alignItems: 'flex-start' as const,
