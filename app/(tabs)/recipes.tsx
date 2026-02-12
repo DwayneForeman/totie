@@ -8,6 +8,7 @@ import { generateObject } from '@rork-ai/toolkit-sdk';
 import { z } from 'zod';
 import { useApp } from '@/context/AppContext';
 import colors from '@/constants/colors';
+import { isPlaceholderImage } from '@/utils/generateRecipeImage';
 import PageCoachMarks, { PageCoachStep } from '@/components/PageCoachMarks';
 import * as Haptics from 'expo-haptics';
 import { FoodDumpItem, Recipe, Ingredient, NutritionInfo } from '@/types';
@@ -116,6 +117,60 @@ export default function RecipesTab() {
     pulse.start();
     return () => pulse.stop();
   }, [pulseAnim]);
+
+  const RECIPE_GRADIENTS = [
+    ['#FF6B4A', '#FF9F43'],
+    ['#1A535C', '#4ECDC4'],
+    ['#E65100', '#FFB347'],
+    ['#2E7D32', '#81C784'],
+    ['#6A1B9A', '#BA68C8'],
+    ['#C62828', '#EF5350'],
+  ];
+
+  const getRecipeEmoji = (title: string): string => {
+    const t = title.toLowerCase();
+    if (/sandwich|burger|sub|wrap|gyro/.test(t)) return '🥪';
+    if (/pasta|spaghetti|penne|noodle|ramen|fettuccine|linguine|mac/.test(t)) return '🍝';
+    if (/pizza/.test(t)) return '🍕';
+    if (/salad/.test(t)) return '🥗';
+    if (/soup|stew|chili|chowder/.test(t)) return '🍲';
+    if (/chicken|wing/.test(t)) return '🍗';
+    if (/steak|beef|brisket/.test(t)) return '🥩';
+    if (/fish|salmon|tuna|cod|sushi/.test(t)) return '🐟';
+    if (/shrimp|prawn|lobster/.test(t)) return '🦐';
+    if (/taco|burrito|quesadilla|enchilada/.test(t)) return '🌮';
+    if (/cake|cupcake|brownie|cookie|dessert/.test(t)) return '🍰';
+    if (/pancake|waffle|french toast|breakfast/.test(t)) return '🥞';
+    if (/rice|fried rice|biryani/.test(t)) return '🍚';
+    if (/curry/.test(t)) return '🍛';
+    if (/pie/.test(t)) return '🥧';
+    if (/smoothie|shake|drink/.test(t)) return '🥤';
+    if (/bread|toast/.test(t)) return '🍞';
+    if (/egg|omelette|omelet|frittata/.test(t)) return '🍳';
+    return '👨‍🍳';
+  };
+
+  const renderRecipeImage = (recipe: Recipe, style: any, showGenerating?: boolean) => {
+    const hasRealImage = recipe.image && !isPlaceholderImage(recipe.image);
+    if (hasRealImage) {
+      return <Image source={{ uri: recipe.image }} style={style} resizeMode="cover" />;
+    }
+    const colorIdx = parseInt(recipe.id, 10) % RECIPE_GRADIENTS.length;
+    const bgColor = RECIPE_GRADIENTS[colorIdx][0];
+    const emoji = getRecipeEmoji(recipe.title);
+    return (
+      <View style={[style, { backgroundColor: bgColor, justifyContent: 'center', alignItems: 'center' }]}>
+        <Text style={{ fontSize: 48 }}>{emoji}</Text>
+        {showGenerating && (
+          <View style={{ position: 'absolute', bottom: 8, left: 0, right: 0, alignItems: 'center' }}>
+            <View style={{ backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 }}>
+              <Text style={{ fontSize: 10, fontWeight: '600' as const, color: '#fff' }}>Generating image...</Text>
+            </View>
+          </View>
+        )}
+      </View>
+    );
+  };
 
 
 
@@ -1198,7 +1253,7 @@ IMPORTANT:
                         activeOpacity={0.8}
                       >
                         <View style={styles.recipeImageWrap}>
-                          <Image source={{ uri: recipe.image }} style={styles.recipeImage} resizeMode="cover" />
+                          {renderRecipeImage(recipe, styles.recipeImage, true)}
                           {recipe.pageNumber && (
                             <View style={styles.pageBadge}>
                               <Text style={styles.pageText}>p.{recipe.pageNumber}</Text>
@@ -1281,16 +1336,9 @@ IMPORTANT:
             showsVerticalScrollIndicator={false}
           >
             <View style={styles.cleanEmptyHero}>
-              <Animated.View style={[styles.cleanEmptyAvatarWrap, { transform: [{ scale: pulseAnim }] }]}>
-                <Image
-                  source={{ uri: 'https://r2-pub.rork.com/attachments/7kh2kny7y4aoan2iczpas' }}
-                  style={styles.cleanEmptyAvatar}
-                  resizeMode="contain"
-                />
-              </Animated.View>
-              <Text style={styles.cleanEmptyTitle}>Start Your Collection</Text>
+              <Text style={styles.cleanEmptyTitle}>Your Recipe Collection</Text>
               <Text style={styles.cleanEmptySubtitle}>
-                Save recipes from anywhere or let AI create them for you
+                Save recipes from links, cookbooks, or create them with AI
               </Text>
             </View>
 
@@ -1549,16 +1597,9 @@ IMPORTANT:
             showsVerticalScrollIndicator={false}
           >
             <View style={styles.cleanEmptyHero}>
-              <Animated.View style={[styles.cleanEmptyAvatarWrap, { transform: [{ scale: pulseAnim }] }]}>
-                <Image
-                  source={{ uri: 'https://r2-pub.rork.com/attachments/7kh2kny7y4aoan2iczpas' }}
-                  style={styles.cleanEmptyAvatar}
-                  resizeMode="contain"
-                />
-              </Animated.View>
-              <Text style={styles.cleanEmptyTitle}>Start Your Collection</Text>
+              <Text style={styles.cleanEmptyTitle}>Your Recipe Collection</Text>
               <Text style={styles.cleanEmptySubtitle}>
-                Save recipes from anywhere or let AI create them for you
+                Save recipes from links, cookbooks, or create them with AI
               </Text>
             </View>
 
@@ -1624,11 +1665,7 @@ IMPORTANT:
                 onPress={() => openRecipeDetail(filteredRecipes[0])}
                 activeOpacity={0.9}
               >
-                <Image
-                  source={{ uri: filteredRecipes[0].image }}
-                  style={styles.featuredImage}
-                  resizeMode="cover"
-                />
+                {renderRecipeImage(filteredRecipes[0], styles.featuredImage)}
                 <View style={styles.featuredOverlay}>
                   <View style={styles.featuredBadge}>
                     <Sparkles size={12} color="#F59E0B" />
@@ -1680,11 +1717,7 @@ IMPORTANT:
                     activeOpacity={0.8}
                   >
                     <View style={styles.recipeImageWrap}>
-                      <Image
-                        source={{ uri: recipe.image }}
-                        style={styles.recipeImage}
-                        resizeMode="cover"
-                      />
+                      {renderRecipeImage(recipe, styles.recipeImage, true)}
                       {recipe.isDIYCraving && recipe.deliveryPrice && recipe.diyPrice && (
                         <View style={styles.savingsBadge}>
                           <Text style={styles.savingsText}>
@@ -2258,7 +2291,7 @@ IMPORTANT:
 
               {selectedRecipe && (
                 <ScrollView style={styles.detailScroll} showsVerticalScrollIndicator={false}>
-                  <Image source={{ uri: selectedRecipe.image }} style={styles.detailImage} resizeMode="cover" />
+                  {renderRecipeImage(selectedRecipe, styles.detailImage)}
 
                   <View style={styles.detailBody}>
                     <Text style={styles.detailTitle}>{selectedRecipe.title}</Text>
@@ -4750,38 +4783,22 @@ const styles = StyleSheet.create({
     paddingTop: 24,
   },
   cleanEmptyHero: {
-    alignItems: 'center' as const,
-    marginBottom: 32,
-  },
-  cleanEmptyAvatarWrap: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
-    backgroundColor: '#FFF5EE',
-    justifyContent: 'center' as const,
-    alignItems: 'center' as const,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255,107,74,0.1)',
-  },
-  cleanEmptyAvatar: {
-    width: 60,
-    height: 60,
+    alignItems: 'flex-start' as const,
+    marginBottom: 28,
   },
   cleanEmptyTitle: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: '800' as const,
     color: colors.text,
     letterSpacing: -0.5,
-    marginBottom: 8,
+    marginBottom: 6,
   },
   cleanEmptySubtitle: {
     fontSize: 15,
     fontWeight: '500' as const,
     color: colors.textSecondary,
-    textAlign: 'center' as const,
+    textAlign: 'left' as const,
     lineHeight: 22,
-    paddingHorizontal: 20,
   },
   cleanEmptyActions: {
     backgroundColor: colors.white,

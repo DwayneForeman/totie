@@ -1,6 +1,6 @@
 import createContextHook from '@nkzw/create-context-hook';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { OnboardingData, UserProfile, Recipe, PantryItem, RecipeMatch, Ingredient, Cookbook, FoodDumpItem, GroceryList, GroceryItem, NutritionInfo, CookedMeal } from '@/types';
 import { generateRecipeImage, isPlaceholderImage, getPlaceholderImage } from '@/utils/generateRecipeImage';
 import { useRevenueCat } from './RevenueCatContext';
@@ -101,6 +101,24 @@ const [AppProviderInternal, useApp] = createContextHook(() => {
   useEffect(() => {
     loadData();
   }, []);
+
+  const hasRetriedImages = useRef(false);
+  useEffect(() => {
+    if (loading || recipes.length === 0 || hasRetriedImages.current) return;
+    hasRetriedImages.current = true;
+    const recipesNeedingImages = recipes.filter(
+      r => !r.image || isPlaceholderImage(r.image)
+    );
+    if (recipesNeedingImages.length > 0) {
+      console.log('[ImageGen] Found', recipesNeedingImages.length, 'recipes with placeholder images, regenerating...');
+      recipesNeedingImages.forEach((r, i) => {
+        setTimeout(() => {
+          generateAndSetRecipeImage(r.id, r.title, r.ingredients);
+        }, i * 2000);
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading]);
 
   const loadData = async () => {
     try {
