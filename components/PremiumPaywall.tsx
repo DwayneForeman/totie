@@ -20,10 +20,11 @@ const FEATURES = [
 interface PremiumPaywallProps {
   visible: boolean;
   onClose: () => void;
+  onPurchaseSuccess?: () => void;
   featureName?: string;
 }
 
-export default function PremiumPaywall({ visible, onClose, featureName }: PremiumPaywallProps) {
+export default function PremiumPaywall({ visible, onClose, onPurchaseSuccess, featureName }: PremiumPaywallProps) {
   const { shouldShowRescuePaywall, markRescuePaywallSeen } = useApp();
   const { 
     currentOffering, 
@@ -176,6 +177,7 @@ export default function PremiumPaywall({ visible, onClose, featureName }: Premiu
         await markRescuePaywallSeen();
       }
       onClose();
+      onPurchaseSuccess?.();
     }
   };
 
@@ -186,6 +188,7 @@ export default function PremiumPaywall({ visible, onClose, featureName }: Premiu
     if (hasPremium) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       onClose();
+      onPurchaseSuccess?.();
     }
   };
 

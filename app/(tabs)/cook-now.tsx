@@ -1717,6 +1717,9 @@ Keep instructions clear and beginner-friendly.`
             router.back();
           }
         }}
+        onPurchaseSuccess={() => {
+          setShowPremiumPaywall(false);
+        }}
         featureName="Cook Now"
       />
     </View>

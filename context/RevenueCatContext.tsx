@@ -68,7 +68,8 @@ const [RevenueCatProviderInternal, useRevenueCat] = createContextHook(() => {
       return info;
     },
     enabled: !!apiKey && isNative,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 1,
+    refetchOnWindowFocus: true,
     retry: 2,
   });
 

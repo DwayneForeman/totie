@@ -159,6 +159,7 @@ export default function KitchenTab() {
   const [isProcessingScan, setIsProcessingScan] = useState(false);
   const [showPremiumPaywall, setShowPremiumPaywall] = useState(false);
   const [paywallFeatureName, setPaywallFeatureName] = useState<string | undefined>(undefined);
+  const [pendingScanSource, setPendingScanSource] = useState<'camera' | 'gallery' | null>(null);
   const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessingVoice, setIsProcessingVoice] = useState(false);
@@ -327,6 +328,7 @@ export default function KitchenTab() {
 
   const processImage = useCallback(async (source: 'camera' | 'gallery') => {
     if (!isPremium) {
+      setPendingScanSource(source);
       setPaywallFeatureName('AI fridge scanning');
       setShowPremiumPaywall(true);
       return;
@@ -1639,7 +1641,17 @@ export default function KitchenTab() {
 
       <PremiumPaywall
         visible={showPremiumPaywall}
-        onClose={() => setShowPremiumPaywall(false)}
+        onClose={() => {
+          setShowPremiumPaywall(false);
+          setPendingScanSource(null);
+        }}
+        onPurchaseSuccess={() => {
+          if (pendingScanSource) {
+            const source = pendingScanSource;
+            setPendingScanSource(null);
+            setTimeout(() => processImage(source), 300);
+          }
+        }}
         featureName={paywallFeatureName}
       />
     </View>

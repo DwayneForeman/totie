@@ -62,7 +62,7 @@ const categorizeIngredient = (name: string): GroceryItem['category'] => {
 };
 
 const [AppProviderInternal, useApp] = createContextHook(() => {
-  const { isPremium: rcIsPremium } = useRevenueCat();
+  const { isPremium: rcIsPremium, isInitialized: rcInitialized } = useRevenueCat();
   const [isOnboardingComplete, setIsOnboardingComplete] = useState<boolean>(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -79,7 +79,24 @@ const [AppProviderInternal, useApp] = createContextHook(() => {
   const [freeRecipeSavesUsed, setFreeRecipeSavesUsed] = useState<number>(0);
   const [hasSeenRescuePaywall, setHasSeenRescuePaywall] = useState<boolean>(false);
 
-  const isPremium = rcIsPremium || localIsPremium;
+  const isPremium = rcInitialized ? rcIsPremium : (rcIsPremium || localIsPremium);
+
+  useEffect(() => {
+    if (!rcInitialized) return;
+    if (rcIsPremium && !localIsPremium) {
+      setLocalIsPremium(true);
+      AsyncStorage.setItem(KEYS.IS_PREMIUM, 'true').catch(e =>
+        console.error('[App] Error persisting premium status:', e)
+      );
+      console.log('[App] Synced local premium ON from RevenueCat');
+    } else if (!rcIsPremium && localIsPremium) {
+      setLocalIsPremium(false);
+      AsyncStorage.setItem(KEYS.IS_PREMIUM, 'false').catch(e =>
+        console.error('[App] Error clearing premium status:', e)
+      );
+      console.log('[App] Synced local premium OFF — subscription expired/cancelled');
+    }
+  }, [rcInitialized, rcIsPremium, localIsPremium]);
 
   useEffect(() => {
     loadData();
