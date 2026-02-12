@@ -1091,6 +1091,33 @@ Keep instructions clear and beginner-friendly.`
                   </TouchableOpacity>
                 )}
               </View>
+
+              {hasPantry && (
+                <View style={styles.emptyAISection}>
+                  <View style={styles.emptyAIDivider}>
+                    <View style={styles.emptyAIDividerLine} />
+                    <Text style={styles.emptyAIDividerText}>or</Text>
+                    <View style={styles.emptyAIDividerLine} />
+                  </View>
+                  <TouchableOpacity
+                    style={styles.emptyAIBtn}
+                    onPress={generateAIRecipe}
+                    disabled={isGeneratingAI}
+                    activeOpacity={0.8}
+                    testID="empty-ai-generate-btn"
+                  >
+                    {isGeneratingAI ? (
+                      <ActivityIndicator size="small" color={colors.white} />
+                    ) : (
+                      <Wand2 size={18} color={colors.white} strokeWidth={2.5} />
+                    )}
+                    <Text style={styles.emptyAIBtnText}>
+                      {isGeneratingAI ? 'Creating your meal...' : 'Generate from My Kitchen'}
+                    </Text>
+                  </TouchableOpacity>
+                  <Text style={styles.emptyAIHint}>AI creates a recipe using only what you have</Text>
+                </View>
+              )}
             </View>
 
             <View style={styles.tipsCard}>
