@@ -14,6 +14,7 @@ import { FoodDumpItem, Recipe, Ingredient, NutritionInfo } from '@/types';
 import { RecipePriceSummary, StorePricePills } from '@/components/StorePricePills';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import PremiumPaywall from '@/components/PremiumPaywall';
+import RecipeProcessingModal from '@/components/RecipeProcessingModal';
 
 interface OpenLibraryBook {
   key: string;
@@ -2572,131 +2573,26 @@ IMPORTANT:
           )}
         </Modal>
 
-        {/* Processing Modal */}
-        <Modal
+        <RecipeProcessingModal
           visible={showProcessing}
-          transparent
-          animationType="fade"
-          onRequestClose={closeProcessingModal}
-        >
-          <View style={styles.processingOverlay}>
-            <View style={styles.processingCard}>
-              {processingStep === 'error' ? (
-                <>
-                  <View style={styles.processingErrorIcon}>
-                    <X size={32} color="#EF4444" strokeWidth={2.5} />
-                  </View>
-                  <Text style={styles.processingTitle}>Oops!</Text>
-                  <Text style={styles.processingSubtext}>{processingError}</Text>
-                  <TouchableOpacity 
-                    style={styles.processingDoneBtn}
-                    onPress={closeProcessingModal}
-                  >
-                    <Text style={styles.processingDoneBtnText}>Close</Text>
-                  </TouchableOpacity>
-                </>
-              ) : processingStep === 'done' ? (
-                <>
-                  <View style={styles.processingSuccessIcon}>
-                    <Check size={32} color={colors.success} strokeWidth={3} />
-                  </View>
-                  <Text style={styles.processingTitle}>Recipe Created! 🎉</Text>
-                  <Text style={styles.processingSubtext}>
-                    {generatedRecipe?.title} is ready with a smart grocery list
-                  </Text>
-                  
-                  {generatedRecipe && (
-                    <View style={styles.recipePreview}>
-                      <View style={styles.recipePreviewHeader}>
-                        <ChefHat size={18} color={colors.secondary} strokeWidth={2.5} />
-                        <Text style={styles.recipePreviewTitle} numberOfLines={1}>
-                          {generatedRecipe.title}
-                        </Text>
-                      </View>
-                      <View style={styles.recipePreviewStats}>
-                        <View style={styles.recipePreviewStat}>
-                          <Clock size={14} color={colors.textSecondary} />
-                          <Text style={styles.recipePreviewStatText}>
-                            {generatedRecipe.prepTime + generatedRecipe.cookTime}m
-                          </Text>
-                        </View>
-                        <View style={styles.recipePreviewStat}>
-                          <Users size={14} color={colors.textSecondary} />
-                          <Text style={styles.recipePreviewStatText}>
-                            {generatedRecipe.servings} servings
-                          </Text>
-                        </View>
-                        <View style={styles.recipePreviewStat}>
-                          <ListChecks size={14} color={colors.textSecondary} />
-                          <Text style={styles.recipePreviewStatText}>
-                            {generatedRecipe.ingredients.length} items
-                          </Text>
-                        </View>
-                      </View>
-                    </View>
-                  )}
-                  
-                  <View style={styles.processingDoneBtns}>
-                    <TouchableOpacity 
-                      style={styles.processingDoneBtn}
-                      onPress={() => {
-                        if (generatedRecipe) {
-                          closeProcessingModal();
-                          openRecipeDetail(generatedRecipe);
-                        } else {
-                          closeProcessingModal();
-                        }
-                      }}
-                    >
-                      <BookOpen size={16} color="#fff" strokeWidth={2.5} />
-                      <Text style={styles.processingDoneBtnText}>View Recipe</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity 
-                      style={styles.processingGroceryBtn}
-                      onPress={() => { closeProcessingModal(); router.push({ pathname: '/(tabs)/kitchen', params: { tab: 'grocery' } }); }}
-                    >
-                      <ShoppingCart size={16} color={colors.secondary} strokeWidth={2.5} />
-                      <Text style={styles.processingGroceryBtnText}>Go to Grocery List</Text>
-                    </TouchableOpacity>
-                  </View>
-                </>
-              ) : (
-                <>
-                  <View style={styles.processingIconWrap}>
-                    <ActivityIndicator size="large" color={colors.secondary} />
-                  </View>
-                  <Text style={styles.processingTitle}>
-                    {processingStep === 'analyzing' && 'Analyzing your idea...'}
-                    {processingStep === 'generating' && 'Generating recipe...'}
-                    {processingStep === 'creating-list' && 'Creating grocery list...'}
-                  </Text>
-                  <Text style={styles.processingSubtext}>
-                    {processingStep === 'analyzing' && (processingItem?.type === 'image' ? 'Analyzing your photo with AI vision...' : `Understanding "${processingItem?.content.substring(0, 40)}${(processingItem?.content.length ?? 0) > 40 ? '...' : ''}"`)}
-                    {processingStep === 'generating' && 'Crafting the perfect recipe with ingredients & instructions'}
-                    {processingStep === 'creating-list' && 'Building your smart shopping list'}
-                  </Text>
-                  
-                  <View style={styles.processingSteps}>
-                    <View style={[styles.processingStepItem, processingStep === 'analyzing' && styles.processingStepActive, (processingStep === 'generating' || processingStep === 'creating-list') && styles.processingStepDone]}>
-                      <View style={[styles.processingStepDot, processingStep === 'analyzing' && styles.processingStepDotActive, (processingStep === 'generating' || processingStep === 'creating-list') && styles.processingStepDotDone]} />
-                      <Text style={[styles.processingStepText, processingStep === 'analyzing' && styles.processingStepTextActive]}>Analyze</Text>
-                    </View>
-                    <View style={styles.processingStepLine} />
-                    <View style={[styles.processingStepItem, processingStep === 'generating' && styles.processingStepActive, processingStep === 'creating-list' && styles.processingStepDone]}>
-                      <View style={[styles.processingStepDot, processingStep === 'generating' && styles.processingStepDotActive, processingStep === 'creating-list' && styles.processingStepDotDone]} />
-                      <Text style={[styles.processingStepText, processingStep === 'generating' && styles.processingStepTextActive]}>Recipe</Text>
-                    </View>
-                    <View style={styles.processingStepLine} />
-                    <View style={[styles.processingStepItem, processingStep === 'creating-list' && styles.processingStepActive]}>
-                      <View style={[styles.processingStepDot, processingStep === 'creating-list' && styles.processingStepDotActive]} />
-                      <Text style={[styles.processingStepText, processingStep === 'creating-list' && styles.processingStepTextActive]}>Grocery List</Text>
-                    </View>
-                  </View>
-                </>
-              )}
-            </View>
-          </View>
-        </Modal>
+          step={processingStep}
+          item={processingItem}
+          recipe={generatedRecipe}
+          error={processingError}
+          onClose={closeProcessingModal}
+          onViewRecipe={() => {
+            if (generatedRecipe) {
+              closeProcessingModal();
+              openRecipeDetail(generatedRecipe);
+            } else {
+              closeProcessingModal();
+            }
+          }}
+          onGoToGroceryList={() => {
+            closeProcessingModal();
+            router.push({ pathname: '/(tabs)/kitchen', params: { tab: 'grocery' } });
+          }}
+        />
       </SafeAreaView>
 
       <Modal

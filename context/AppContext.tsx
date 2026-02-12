@@ -253,22 +253,7 @@ const [AppProviderInternal, useApp] = createContextHook(() => {
 
   const addRecipe = async (recipe: Omit<Recipe, 'id' | 'createdAt'>): Promise<Recipe> => {
     const needsGeneration = !recipe.image || isPlaceholderImage(recipe.image);
-    let finalImage = recipe.image || getPlaceholderImage();
-
-    if (needsGeneration) {
-      console.log('[ImageGen] Generating AI image on the spot for:', recipe.title);
-      try {
-        const generatedUri = await generateRecipeImage(recipe.title, recipe.ingredients);
-        if (generatedUri) {
-          finalImage = generatedUri;
-          console.log('[ImageGen] Image generated successfully for:', recipe.title);
-        } else {
-          console.log('[ImageGen] Generation returned null, using fallback for:', recipe.title);
-        }
-      } catch (error) {
-        console.error('[ImageGen] On-the-spot generation failed for:', recipe.title, error);
-      }
-    }
+    const finalImage = recipe.image || getPlaceholderImage();
 
     const newRecipe: Recipe = {
       ...recipe,
@@ -285,6 +270,11 @@ const [AppProviderInternal, useApp] = createContextHook(() => {
       await AsyncStorage.setItem(KEYS.RECIPES, JSON.stringify(updatedRecipes));
     } catch (error) {
       console.error('Error saving recipe:', error);
+    }
+
+    if (needsGeneration) {
+      console.log('[ImageGen] Starting background image generation for:', recipe.title);
+      generateAndSetRecipeImage(newRecipe.id, recipe.title, recipe.ingredients);
     }
 
     return newRecipe;
@@ -358,20 +348,7 @@ const [AppProviderInternal, useApp] = createContextHook(() => {
     cookbookId: string
   ) => {
     const needsGeneration = !recipe.image || isPlaceholderImage(recipe.image);
-    let finalImage = recipe.image || getPlaceholderImage();
-
-    if (needsGeneration) {
-      console.log('[ImageGen] Generating AI image on the spot for cookbook recipe:', recipe.title);
-      try {
-        const generatedUri = await generateRecipeImage(recipe.title, recipe.ingredients);
-        if (generatedUri) {
-          finalImage = generatedUri;
-          console.log('[ImageGen] Cookbook recipe image generated for:', recipe.title);
-        }
-      } catch (error) {
-        console.error('[ImageGen] Cookbook recipe image generation failed:', recipe.title, error);
-      }
-    }
+    const finalImage = recipe.image || getPlaceholderImage();
 
     const newRecipe: Recipe = {
       ...recipe,
@@ -396,6 +373,11 @@ const [AppProviderInternal, useApp] = createContextHook(() => {
       await AsyncStorage.setItem(KEYS.COOKBOOKS, JSON.stringify(updatedCookbooks));
     } catch (error) {
       console.error('Error saving recipe from cookbook:', error);
+    }
+
+    if (needsGeneration) {
+      console.log('[ImageGen] Starting background image generation for cookbook recipe:', recipe.title);
+      generateAndSetRecipeImage(newRecipe.id, recipe.title, recipe.ingredients);
     }
   };
 
