@@ -134,7 +134,7 @@ export default function Features() {
             ],
           }}>
             <Text style={styles.headline}>
-              Here's how{'\n'}
+              Here&apos;s how{'\n'}
               <Text style={styles.headlineAccent}>Totie helps</Text>
             </Text>
           </Animated.View>

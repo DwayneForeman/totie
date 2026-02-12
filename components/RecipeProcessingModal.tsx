@@ -4,7 +4,7 @@ import { Check, X, BookOpen, ShoppingCart, Clock, Users, ListChecks, ChefHat } f
 import colors from '@/constants/colors';
 import { Recipe, FoodDumpItem } from '@/types';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const { width: _SCREEN_WIDTH } = Dimensions.get('window');
 
 type ProcessingStep = 'analyzing' | 'generating' | 'creating-list' | 'done' | 'error';
 

@@ -11,7 +11,7 @@ import PremiumPaywall from '@/components/PremiumPaywall';
 
 export default function HomeTab() {
   const router = useRouter();
-  const { userProfile, recipes, pantryItems, isTutorialComplete, completeTutorial, isPremium, canSaveRecipeFromLink, incrementFreeRecipeSaves } = useApp();
+  const { userProfile, recipes, pantryItems, isTutorialComplete, completeTutorial, isPremium } = useApp();
   const [showTutorial, setShowTutorial] = useState(false);
   const [spotlightRefs, setSpotlightRefs] = useState<SpotlightRefs>({});
   const [showPremiumPaywall, setShowPremiumPaywall] = useState(false);

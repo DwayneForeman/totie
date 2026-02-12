@@ -217,7 +217,7 @@ export default function CookNowTab() {
           } else if (parsed.name || parsed.description) {
             metaParts.push(`Structured Data: name=${parsed.name || ''}, description=${parsed.description || ''}`);
           }
-        } catch (_e) { /* ignore parse errors */ }
+        } catch { /* ignore parse errors */ }
       }
     }
 

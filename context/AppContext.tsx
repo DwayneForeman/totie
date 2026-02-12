@@ -1,6 +1,6 @@
 import createContextHook from '@nkzw/create-context-hook';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { OnboardingData, UserProfile, Recipe, PantryItem, RecipeMatch, Ingredient, Cookbook, FoodDumpItem, GroceryList, GroceryItem, NutritionInfo, CookedMeal } from '@/types';
 import { generateRecipeImage, isPlaceholderImage, getPlaceholderImage } from '@/utils/generateRecipeImage';
 import { useRevenueCat } from './RevenueCatContext';
