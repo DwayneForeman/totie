@@ -8,7 +8,7 @@ import { generateObject } from '@rork-ai/toolkit-sdk';
 import { z } from 'zod';
 import { useApp } from '@/context/AppContext';
 import colors from '@/constants/colors';
-import { isPlaceholderImage } from '@/utils/generateRecipeImage';
+import { isPlaceholderImage, generateRecipeImage } from '@/utils/generateRecipeImage';
 import PageCoachMarks, { PageCoachStep } from '@/components/PageCoachMarks';
 import * as Haptics from 'expo-haptics';
 import { FoodDumpItem, Recipe, Ingredient, NutritionInfo } from '@/types';
@@ -118,56 +118,17 @@ export default function RecipesTab() {
     return () => pulse.stop();
   }, [pulseAnim]);
 
-  const RECIPE_GRADIENTS = [
-    ['#FF6B4A', '#FF9F43'],
-    ['#1A535C', '#4ECDC4'],
-    ['#E65100', '#FFB347'],
-    ['#2E7D32', '#81C784'],
-    ['#6A1B9A', '#BA68C8'],
-    ['#C62828', '#EF5350'],
-  ];
 
-  const getRecipeEmoji = (title: string): string => {
-    const t = title.toLowerCase();
-    if (/sandwich|burger|sub|wrap|gyro/.test(t)) return '🥪';
-    if (/pasta|spaghetti|penne|noodle|ramen|fettuccine|linguine|mac/.test(t)) return '🍝';
-    if (/pizza/.test(t)) return '🍕';
-    if (/salad/.test(t)) return '🥗';
-    if (/soup|stew|chili|chowder/.test(t)) return '🍲';
-    if (/chicken|wing/.test(t)) return '🍗';
-    if (/steak|beef|brisket/.test(t)) return '🥩';
-    if (/fish|salmon|tuna|cod|sushi/.test(t)) return '🐟';
-    if (/shrimp|prawn|lobster/.test(t)) return '🦐';
-    if (/taco|burrito|quesadilla|enchilada/.test(t)) return '🌮';
-    if (/cake|cupcake|brownie|cookie|dessert/.test(t)) return '🍰';
-    if (/pancake|waffle|french toast|breakfast/.test(t)) return '🥞';
-    if (/rice|fried rice|biryani/.test(t)) return '🍚';
-    if (/curry/.test(t)) return '🍛';
-    if (/pie/.test(t)) return '🥧';
-    if (/smoothie|shake|drink/.test(t)) return '🥤';
-    if (/bread|toast/.test(t)) return '🍞';
-    if (/egg|omelette|omelet|frittata/.test(t)) return '🍳';
-    return '👨‍🍳';
-  };
 
-  const renderRecipeImage = (recipe: Recipe, style: any, showGenerating?: boolean) => {
+  const renderRecipeImage = (recipe: Recipe, style: any) => {
     const hasRealImage = recipe.image && !isPlaceholderImage(recipe.image);
     if (hasRealImage) {
       return <Image source={{ uri: recipe.image }} style={style} resizeMode="cover" />;
     }
-    const colorIdx = parseInt(recipe.id, 10) % RECIPE_GRADIENTS.length;
-    const bgColor = RECIPE_GRADIENTS[colorIdx][0];
-    const emoji = getRecipeEmoji(recipe.title);
     return (
-      <View style={[style, { backgroundColor: bgColor, justifyContent: 'center', alignItems: 'center' }]}>
-        <Text style={{ fontSize: 48 }}>{emoji}</Text>
-        {showGenerating && (
-          <View style={{ position: 'absolute', bottom: 8, left: 0, right: 0, alignItems: 'center' }}>
-            <View style={{ backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 }}>
-              <Text style={{ fontSize: 10, fontWeight: '600' as const, color: '#fff' }}>Generating image...</Text>
-            </View>
-          </View>
-        )}
+      <View style={[style, { backgroundColor: '#1A1A1C', justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="small" color="rgba(255,255,255,0.6)" style={{ marginBottom: 6 }} />
+        <Text style={{ fontSize: 11, fontWeight: '600' as const, color: 'rgba(255,255,255,0.55)', letterSpacing: 0.3 }}>Generating photo...</Text>
       </View>
     );
   };
@@ -693,7 +654,15 @@ IMPORTANT:
       };
 
       setProcessingStep('creating-list');
-      await new Promise(resolve => setTimeout(resolve, 600));
+
+      const [snapGeneratedImage] = await Promise.all([
+        generateRecipeImage(result.title, result.ingredients as { name: string }[]),
+        new Promise(resolve => setTimeout(resolve, 600)),
+      ]);
+
+      if (snapGeneratedImage) {
+        recipeData.image = snapGeneratedImage;
+      }
 
       const savedRecipe = await addRecipe(recipeData);
       setGeneratedRecipe(savedRecipe);
@@ -969,9 +938,18 @@ IMPORTANT:
         schema: recipeSchema,
       });
       
+      setProcessingStep('creating-list');
+
+      const [generatedImageUri] = await Promise.all([
+        generateRecipeImage(result.title, result.ingredients as { name: string }[]),
+        new Promise(resolve => setTimeout(resolve, 600)),
+      ]);
+
+      console.log('[Recipes] AI image generated:', !!generatedImageUri);
+
       const recipeData = {
         title: result.title,
-        image: item.thumbnail || '',
+        image: generatedImageUri || item.thumbnail || '',
         ingredients: result.ingredients as Ingredient[],
         instructions: result.instructions,
         prepTime: result.prepTime,
@@ -980,11 +958,7 @@ IMPORTANT:
         source: item.type === 'link' ? item.content : (item.type === 'image' ? 'Snapped Recipe' : 'Food Dump'),
         isDIYCraving: item.type === 'image' ? true : undefined,
       };
-      
-      setProcessingStep('creating-list');
-      
-      await new Promise(resolve => setTimeout(resolve, 600));
-      
+
       const savedRecipe = await addRecipe(recipeData);
       setGeneratedRecipe(savedRecipe);
       await createGroceryList(`${result.title} Shopping`, [savedRecipe.id], [savedRecipe]);
@@ -1253,7 +1227,7 @@ IMPORTANT:
                         activeOpacity={0.8}
                       >
                         <View style={styles.recipeImageWrap}>
-                          {renderRecipeImage(recipe, styles.recipeImage, true)}
+                          {renderRecipeImage(recipe, styles.recipeImage)}
                           {recipe.pageNumber && (
                             <View style={styles.pageBadge}>
                               <Text style={styles.pageText}>p.{recipe.pageNumber}</Text>
@@ -1717,7 +1691,7 @@ IMPORTANT:
                     activeOpacity={0.8}
                   >
                     <View style={styles.recipeImageWrap}>
-                      {renderRecipeImage(recipe, styles.recipeImage, true)}
+                      {renderRecipeImage(recipe, styles.recipeImage)}
                       {recipe.isDIYCraving && recipe.deliveryPrice && recipe.diyPrice && (
                         <View style={styles.savingsBadge}>
                           <Text style={styles.savingsText}>
