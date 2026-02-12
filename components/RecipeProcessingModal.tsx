@@ -58,6 +58,7 @@ const SPARKLE_EMOJIS = ['✨', '🎉', '⭐', '🌟', '✨', '🎊', '⭐', '�
 export default function RecipeProcessingModal({
   visible, step, item, recipe, error, onClose, onViewRecipe, onGoToGroceryList,
 }: RecipeProcessingModalProps) {
+  console.log('[RecipeProcessingModal] render — visible:', visible, 'step:', step);
   const progress = useRef(new Animated.Value(0)).current;
   const iconPulse = useRef(new Animated.Value(1)).current;
   const glowOpacity = useRef(new Animated.Value(0.3)).current;

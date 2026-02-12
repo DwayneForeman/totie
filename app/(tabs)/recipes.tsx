@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Modal, TextInput, Pressable, ActivityIndicator, Platform, Alert, Animated, KeyboardAvoidingView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Search, SlidersHorizontal, Plus, Link as LinkIcon, Camera, Edit3, Clock, Users, Sparkles, BookOpen, X, ChevronRight, ScanBarcode, Keyboard, Heart, Brain, Trash2, ExternalLink, Lightbulb, Check, ChefHat, ListChecks, Flame, ArrowRight, ShoppingCart, Zap, Droplets } from 'lucide-react-native';
+import { Search, SlidersHorizontal, Plus, Link as LinkIcon, Camera, Edit3, Clock, Users, Sparkles, BookOpen, X, ChevronRight, ScanBarcode, Keyboard, Heart, Brain, Trash2, ExternalLink, Lightbulb, Check, Flame, ArrowRight, ShoppingCart, Zap, Droplets } from 'lucide-react-native';
 import { CameraView, useCameraPermissions, BarcodeScanningResult } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import { generateObject } from '@rork-ai/toolkit-sdk';
@@ -1277,142 +1277,72 @@ IMPORTANT:
         ) : activeFilter === 'All' && filteredRecipes.length === 0 ? (
           <ScrollView 
             style={styles.emptyScroll} 
-            contentContainerStyle={styles.allEmptyScrollContent}
+            contentContainerStyle={styles.cleanEmptyContent}
             showsVerticalScrollIndicator={false}
           >
-            {/* Premium Hero Card */}
-            <View style={styles.premiumHeroCard}>
-              <View style={styles.premiumHeroInner}>
-                <View style={styles.heroGlowOrb1} />
-                <View style={styles.heroGlowOrb2} />
-                <View style={styles.floatingPillsContainer}>
-                  <View style={[styles.floatingPill, styles.floatingPillTopLeft, { backgroundColor: 'rgba(46,125,50,0.1)' }]}>
-                    <ShoppingCart size={11} color="#2E7D32" strokeWidth={2.5} />
-                    <Text style={[styles.heroTagText, { color: '#2E7D32' }]}>Cut Delivery Spending</Text>
-                  </View>
-                  <View style={[styles.floatingPill, styles.floatingPillTopRight, { backgroundColor: 'rgba(245,158,11,0.1)' }]}>
-                    <Zap size={11} color="#F59E0B" strokeWidth={2.5} />
-                    <Text style={[styles.heroTagText, { color: '#F59E0B' }]}>Quick Meals</Text>
-                  </View>
-                  <View style={[styles.floatingPill, styles.floatingPillLeft]}>
-                    <Sparkles size={11} color={colors.primary} strokeWidth={2.5} />
-                    <Text style={styles.heroTagText}>AI-Powered</Text>
-                  </View>
-                  <View style={[styles.floatingPill, styles.floatingPillRight, { backgroundColor: 'rgba(99,110,114,0.08)' }]}>
-                    <Droplets size={11} color={colors.secondary} strokeWidth={2.5} />
-                    <Text style={[styles.heroTagText, { color: colors.secondary }]}>Track Kitchen</Text>
-                  </View>
-                  <Animated.View style={[styles.heroRingOuter, { transform: [{ scale: pulseAnim }] }]}>
-                    <View style={styles.heroRingInner}>
-                      <Image
-                        source={{ uri: 'https://r2-pub.rork.com/attachments/7kh2kny7y4aoan2iczpas' }}
-                        style={styles.premiumHeroImage}
-                        resizeMode="contain"
-                      />
-                    </View>
-                  </Animated.View>
-                  <View style={[styles.floatingPill, styles.floatingPillBottomLeft, { backgroundColor: 'rgba(255,107,74,0.08)' }]}>
-                    <Heart size={11} color="#E85A3A" strokeWidth={2.5} />
-                    <Text style={[styles.heroTagText, { color: '#E85A3A' }]}>Organize Your Recipes</Text>
-                  </View>
-                  <View style={[styles.floatingPill, styles.floatingPillBottomRight, { backgroundColor: 'rgba(16,185,129,0.1)' }]}>
-                    <Brain size={11} color="#10B981" strokeWidth={2.5} />
-                    <Text style={[styles.heroTagText, { color: '#10B981' }]}>Know What to Cook</Text>
-                  </View>
-                </View>
-              </View>
-            </View>
-
-            {/* Title Section */}
-            <View style={styles.premiumTitleSection}>
-              <Text style={styles.premiumTitle}>Your Recipe Collection</Text>
-              <Text style={styles.premiumSubtitle}>
-                All your saved recipes in one place. Start building your personalized cookbook!
+            <View style={styles.cleanEmptyHero}>
+              <Animated.View style={[styles.cleanEmptyAvatarWrap, { transform: [{ scale: pulseAnim }] }]}>
+                <Image
+                  source={{ uri: 'https://r2-pub.rork.com/attachments/7kh2kny7y4aoan2iczpas' }}
+                  style={styles.cleanEmptyAvatar}
+                  resizeMode="contain"
+                />
+              </Animated.View>
+              <Text style={styles.cleanEmptyTitle}>Start Your Collection</Text>
+              <Text style={styles.cleanEmptySubtitle}>
+                Save recipes from anywhere or let AI create them for you
               </Text>
             </View>
 
-            {/* Premium Action Cards */}
-            <View style={styles.premiumActions}>
+            <View style={styles.cleanEmptyActions}>
               <TouchableOpacity 
-                style={styles.premiumActionCard}
+                style={styles.cleanEmptyActionRow}
                 onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setNewIdeaType('note'); setShowAddIdea(true); }}
                 activeOpacity={0.7}
               >
-                <View style={styles.premiumActionGlow} />
-                <View style={[styles.premiumActionIcon, { backgroundColor: 'rgba(255,107,53,0.12)' }]}>
-                  <Sparkles size={24} color={colors.primary} strokeWidth={2.5} />
+                <View style={[styles.cleanEmptyActionIcon, { backgroundColor: 'rgba(255,107,53,0.1)' }]}>
+                  <Sparkles size={20} color={colors.primary} strokeWidth={2.5} />
                 </View>
-                <View style={styles.premiumActionContent}>
-                  <Text style={styles.premiumActionTitle}>Create with AI</Text>
-                  <Text style={styles.premiumActionSubtext}>Describe any dish</Text>
+                <View style={styles.cleanEmptyActionText}>
+                  <Text style={styles.cleanEmptyActionTitle}>Create with AI</Text>
+                  <Text style={styles.cleanEmptyActionSub}>Describe any dish</Text>
                 </View>
-                <View style={styles.premiumActionArrow}>
-                  <ArrowRight size={18} color={colors.primary} strokeWidth={2.5} />
-                </View>
+                <ArrowRight size={16} color={colors.textMuted} strokeWidth={2} />
               </TouchableOpacity>
 
+              <View style={styles.cleanEmptyDivider} />
+
               <TouchableOpacity 
-                style={styles.premiumActionCard}
+                style={styles.cleanEmptyActionRow}
                 onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setNewIdeaType('link'); setShowAddIdea(true); }}
                 activeOpacity={0.7}
               >
-                <View style={[styles.premiumActionIcon, { backgroundColor: 'rgba(46,125,50,0.1)' }]}>
-                  <LinkIcon size={24} color="#2E7D32" strokeWidth={2.5} />
+                <View style={[styles.cleanEmptyActionIcon, { backgroundColor: 'rgba(26,83,92,0.08)' }]}>
+                  <LinkIcon size={20} color={colors.secondary} strokeWidth={2.5} />
                 </View>
-                <View style={styles.premiumActionContent}>
-                  <Text style={styles.premiumActionTitle}>Import from Link</Text>
-                  <Text style={styles.premiumActionSubtext}>Paste any recipe URL</Text>
+                <View style={styles.cleanEmptyActionText}>
+                  <Text style={styles.cleanEmptyActionTitle}>Import from Link</Text>
+                  <Text style={styles.cleanEmptyActionSub}>Paste any recipe URL</Text>
                 </View>
-                <View style={[styles.premiumActionArrow, { backgroundColor: 'rgba(46,125,50,0.08)' }]}>
-                  <ArrowRight size={18} color="#2E7D32" strokeWidth={2.5} />
-                </View>
+                <ArrowRight size={16} color={colors.textMuted} strokeWidth={2} />
               </TouchableOpacity>
 
+              <View style={styles.cleanEmptyDivider} />
+
               <TouchableOpacity 
-                style={styles.premiumActionCard}
+                style={styles.cleanEmptyActionRow}
                 onPress={() => handleSnapCraving()}
                 activeOpacity={0.7}
               >
-                <View style={[styles.premiumActionIcon, { backgroundColor: 'rgba(245,158,11,0.12)' }]}>
-                  <Camera size={24} color="#F59E0B" strokeWidth={2.5} />
+                <View style={[styles.cleanEmptyActionIcon, { backgroundColor: 'rgba(245,158,11,0.1)' }]}>
+                  <Camera size={20} color="#F59E0B" strokeWidth={2.5} />
                 </View>
-                <View style={styles.premiumActionContent}>
-                  <Text style={styles.premiumActionTitle}>Snap a Craving</Text>
-                  <Text style={styles.premiumActionSubtext}>Turn screenshots into recipes</Text>
+                <View style={styles.cleanEmptyActionText}>
+                  <Text style={styles.cleanEmptyActionTitle}>Snap a Craving</Text>
+                  <Text style={styles.cleanEmptyActionSub}>Photo or screenshot to recipe</Text>
                 </View>
-                <View style={[styles.premiumActionArrow, { backgroundColor: 'rgba(245,158,11,0.1)' }]}>
-                  <ArrowRight size={18} color="#F59E0B" strokeWidth={2.5} />
-                </View>
+                <ArrowRight size={16} color={colors.textMuted} strokeWidth={2} />
               </TouchableOpacity>
-            </View>
-
-            {/* Premium Stats */}
-            <View style={styles.premiumStatsCard}>
-              <View style={styles.premiumStatsInner}>
-                <View style={styles.premiumStatItem}>
-                  <View style={styles.premiumStatIconWrap}>
-                    <ChefHat size={16} color={colors.primary} strokeWidth={2.5} />
-                  </View>
-                  <Text style={styles.premiumStatValue}>0</Text>
-                  <Text style={styles.premiumStatLabel}>Recipes</Text>
-                </View>
-                <View style={styles.premiumStatDivider} />
-                <View style={styles.premiumStatItem}>
-                  <View style={styles.premiumStatIconWrap}>
-                    <Zap size={16} color="#10B981" strokeWidth={2.5} />
-                  </View>
-                  <Text style={[styles.premiumStatValue, { color: '#10B981' }]}>$0</Text>
-                  <Text style={styles.premiumStatLabel}>Saved</Text>
-                </View>
-                <View style={styles.premiumStatDivider} />
-                <View style={styles.premiumStatItem}>
-                  <View style={styles.premiumStatIconWrap}>
-                    <Flame size={16} color="#F59E0B" strokeWidth={2.5} />
-                  </View>
-                  <Text style={styles.premiumStatValue}>0</Text>
-                  <Text style={styles.premiumStatLabel}>Cooked</Text>
-                </View>
-              </View>
             </View>
 
             <View style={{ height: 100 }} />
@@ -1615,139 +1545,72 @@ IMPORTANT:
         ) : recipes.length === 0 ? (
           <ScrollView 
             style={styles.emptyScroll} 
-            contentContainerStyle={styles.allEmptyScrollContent}
+            contentContainerStyle={styles.cleanEmptyContent}
             showsVerticalScrollIndicator={false}
           >
-            {/* Premium Hero Card */}
-            <View style={styles.premiumHeroCard}>
-              <View style={styles.premiumHeroInner}>
-                <View style={styles.heroGlowOrb1} />
-                <View style={styles.heroGlowOrb2} />
-                <View style={styles.floatingPillsContainer}>
-                  <View style={[styles.floatingPill, styles.floatingPillTopLeft, { backgroundColor: 'rgba(46,125,50,0.1)' }]}>
-                    <ShoppingCart size={11} color="#2E7D32" strokeWidth={2.5} />
-                    <Text style={[styles.heroTagText, { color: '#2E7D32' }]}>Cut Delivery Spending</Text>
-                  </View>
-                  <View style={[styles.floatingPill, styles.floatingPillTopRight, { backgroundColor: 'rgba(245,158,11,0.1)' }]}>
-                    <Zap size={11} color="#F59E0B" strokeWidth={2.5} />
-                    <Text style={[styles.heroTagText, { color: '#F59E0B' }]}>Quick Meals</Text>
-                  </View>
-                  <View style={[styles.floatingPill, styles.floatingPillLeft]}>
-                    <Sparkles size={11} color={colors.primary} strokeWidth={2.5} />
-                    <Text style={styles.heroTagText}>AI-Powered</Text>
-                  </View>
-                  <View style={[styles.floatingPill, styles.floatingPillRight, { backgroundColor: 'rgba(99,110,114,0.08)' }]}>
-                    <Droplets size={11} color={colors.secondary} strokeWidth={2.5} />
-                    <Text style={[styles.heroTagText, { color: colors.secondary }]}>Track Kitchen</Text>
-                  </View>
-                  <Animated.View style={[styles.heroRingOuter, { transform: [{ scale: pulseAnim }] }]}>
-                    <View style={styles.heroRingInner}>
-                      <Image
-                        source={{ uri: 'https://r2-pub.rork.com/attachments/7kh2kny7y4aoan2iczpas' }}
-                        style={styles.premiumHeroImage}
-                        resizeMode="contain"
-                      />
-                    </View>
-                  </Animated.View>
-                  <View style={[styles.floatingPill, styles.floatingPillBottomLeft, { backgroundColor: 'rgba(255,107,74,0.08)' }]}>
-                    <Heart size={11} color="#E85A3A" strokeWidth={2.5} />
-                    <Text style={[styles.heroTagText, { color: '#E85A3A' }]}>Organize Your Recipes</Text>
-                  </View>
-                  <View style={[styles.floatingPill, styles.floatingPillBottomRight, { backgroundColor: 'rgba(16,185,129,0.1)' }]}>
-                    <Brain size={11} color="#10B981" strokeWidth={2.5} />
-                    <Text style={[styles.heroTagText, { color: '#10B981' }]}>Know What to Cook</Text>
-                  </View>
-                </View>
-              </View>
-            </View>
-
-            <View style={styles.premiumTitleSection}>
-              <Text style={styles.premiumTitle}>Your Recipe Collection</Text>
-              <Text style={styles.premiumSubtitle}>
-                All your saved recipes in one place. Start building your personalized cookbook!
+            <View style={styles.cleanEmptyHero}>
+              <Animated.View style={[styles.cleanEmptyAvatarWrap, { transform: [{ scale: pulseAnim }] }]}>
+                <Image
+                  source={{ uri: 'https://r2-pub.rork.com/attachments/7kh2kny7y4aoan2iczpas' }}
+                  style={styles.cleanEmptyAvatar}
+                  resizeMode="contain"
+                />
+              </Animated.View>
+              <Text style={styles.cleanEmptyTitle}>Start Your Collection</Text>
+              <Text style={styles.cleanEmptySubtitle}>
+                Save recipes from anywhere or let AI create them for you
               </Text>
             </View>
 
-            <View style={styles.premiumActions}>
+            <View style={styles.cleanEmptyActions}>
               <TouchableOpacity 
-                style={styles.premiumActionCard}
+                style={styles.cleanEmptyActionRow}
                 onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setNewIdeaType('note'); setShowAddIdea(true); }}
                 activeOpacity={0.7}
               >
-                <View style={styles.premiumActionGlow} />
-                <View style={[styles.premiumActionIcon, { backgroundColor: 'rgba(255,107,53,0.12)' }]}>
-                  <Sparkles size={24} color={colors.primary} strokeWidth={2.5} />
+                <View style={[styles.cleanEmptyActionIcon, { backgroundColor: 'rgba(255,107,53,0.1)' }]}>
+                  <Sparkles size={20} color={colors.primary} strokeWidth={2.5} />
                 </View>
-                <View style={styles.premiumActionContent}>
-                  <Text style={styles.premiumActionTitle}>Create with AI</Text>
-                  <Text style={styles.premiumActionSubtext}>Describe any dish</Text>
+                <View style={styles.cleanEmptyActionText}>
+                  <Text style={styles.cleanEmptyActionTitle}>Create with AI</Text>
+                  <Text style={styles.cleanEmptyActionSub}>Describe any dish</Text>
                 </View>
-                <View style={styles.premiumActionArrow}>
-                  <ArrowRight size={18} color={colors.primary} strokeWidth={2.5} />
-                </View>
+                <ArrowRight size={16} color={colors.textMuted} strokeWidth={2} />
               </TouchableOpacity>
 
+              <View style={styles.cleanEmptyDivider} />
+
               <TouchableOpacity 
-                style={styles.premiumActionCard}
+                style={styles.cleanEmptyActionRow}
                 onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setNewIdeaType('link'); setShowAddIdea(true); }}
                 activeOpacity={0.7}
               >
-                <View style={[styles.premiumActionIcon, { backgroundColor: 'rgba(46,125,50,0.1)' }]}>
-                  <LinkIcon size={24} color="#2E7D32" strokeWidth={2.5} />
+                <View style={[styles.cleanEmptyActionIcon, { backgroundColor: 'rgba(26,83,92,0.08)' }]}>
+                  <LinkIcon size={20} color={colors.secondary} strokeWidth={2.5} />
                 </View>
-                <View style={styles.premiumActionContent}>
-                  <Text style={styles.premiumActionTitle}>Import from Link</Text>
-                  <Text style={styles.premiumActionSubtext}>Paste any recipe URL</Text>
+                <View style={styles.cleanEmptyActionText}>
+                  <Text style={styles.cleanEmptyActionTitle}>Import from Link</Text>
+                  <Text style={styles.cleanEmptyActionSub}>Paste any recipe URL</Text>
                 </View>
-                <View style={[styles.premiumActionArrow, { backgroundColor: 'rgba(46,125,50,0.08)' }]}>
-                  <ArrowRight size={18} color="#2E7D32" strokeWidth={2.5} />
-                </View>
+                <ArrowRight size={16} color={colors.textMuted} strokeWidth={2} />
               </TouchableOpacity>
 
+              <View style={styles.cleanEmptyDivider} />
+
               <TouchableOpacity 
-                style={styles.premiumActionCard}
+                style={styles.cleanEmptyActionRow}
                 onPress={() => handleSnapCraving()}
                 activeOpacity={0.7}
               >
-                <View style={[styles.premiumActionIcon, { backgroundColor: 'rgba(245,158,11,0.12)' }]}>
-                  <Camera size={24} color="#F59E0B" strokeWidth={2.5} />
+                <View style={[styles.cleanEmptyActionIcon, { backgroundColor: 'rgba(245,158,11,0.1)' }]}>
+                  <Camera size={20} color="#F59E0B" strokeWidth={2.5} />
                 </View>
-                <View style={styles.premiumActionContent}>
-                  <Text style={styles.premiumActionTitle}>Snap a Craving</Text>
-                  <Text style={styles.premiumActionSubtext}>Turn screenshots into recipes</Text>
+                <View style={styles.cleanEmptyActionText}>
+                  <Text style={styles.cleanEmptyActionTitle}>Snap a Craving</Text>
+                  <Text style={styles.cleanEmptyActionSub}>Photo or screenshot to recipe</Text>
                 </View>
-                <View style={[styles.premiumActionArrow, { backgroundColor: 'rgba(245,158,11,0.1)' }]}>
-                  <ArrowRight size={18} color="#F59E0B" strokeWidth={2.5} />
-                </View>
+                <ArrowRight size={16} color={colors.textMuted} strokeWidth={2} />
               </TouchableOpacity>
-            </View>
-
-            <View style={styles.premiumStatsCard}>
-              <View style={styles.premiumStatsInner}>
-                <View style={styles.premiumStatItem}>
-                  <View style={styles.premiumStatIconWrap}>
-                    <ChefHat size={16} color={colors.primary} strokeWidth={2.5} />
-                  </View>
-                  <Text style={styles.premiumStatValue}>0</Text>
-                  <Text style={styles.premiumStatLabel}>Recipes</Text>
-                </View>
-                <View style={styles.premiumStatDivider} />
-                <View style={styles.premiumStatItem}>
-                  <View style={styles.premiumStatIconWrap}>
-                    <Zap size={16} color="#10B981" strokeWidth={2.5} />
-                  </View>
-                  <Text style={[styles.premiumStatValue, { color: '#10B981' }]}>$0</Text>
-                  <Text style={styles.premiumStatLabel}>Saved</Text>
-                </View>
-                <View style={styles.premiumStatDivider} />
-                <View style={styles.premiumStatItem}>
-                  <View style={styles.premiumStatIconWrap}>
-                    <Flame size={16} color="#F59E0B" strokeWidth={2.5} />
-                  </View>
-                  <Text style={styles.premiumStatValue}>0</Text>
-                  <Text style={styles.premiumStatLabel}>Cooked</Text>
-                </View>
-              </View>
             </View>
 
             <View style={{ height: 100 }} />
@@ -4882,253 +4745,87 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 12,
   },
-  premiumHeroCard: {
-    marginBottom: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.08,
-    shadowRadius: 24,
-    elevation: 8,
+  cleanEmptyContent: {
+    paddingHorizontal: 20,
+    paddingTop: 24,
   },
-  premiumHeroInner: {
+  cleanEmptyHero: {
+    alignItems: 'center' as const,
+    marginBottom: 32,
+  },
+  cleanEmptyAvatarWrap: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
     backgroundColor: '#FFF5EE',
-    borderRadius: 28,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    position: 'relative' as const,
-    overflow: 'hidden' as const,
+    justifyContent: 'center' as const,
     alignItems: 'center' as const,
+    marginBottom: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255,107,74,0.12)',
+    borderColor: 'rgba(255,107,74,0.1)',
   },
-  heroGlowOrb1: {
-    position: 'absolute' as const,
-    top: -30,
-    right: -30,
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: 'rgba(255,107,74,0.08)',
+  cleanEmptyAvatar: {
+    width: 60,
+    height: 60,
   },
-  heroGlowOrb2: {
-    position: 'absolute' as const,
-    bottom: -20,
-    left: -20,
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: 'rgba(255,179,71,0.08)',
-  },
-  heroRingOuter: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: 'rgba(255,107,74,0.06)',
-    justifyContent: 'center' as const,
-    alignItems: 'center' as const,
-    marginBottom: 0,
-  },
-  heroRingInner: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: 'rgba(255,255,255,0.8)',
-    justifyContent: 'center' as const,
-    alignItems: 'center' as const,
-    shadowColor: '#FF6B4A',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
-    elevation: 4,
-  },
-  floatingPillsContainer: {
-    width: '100%',
-    alignItems: 'center' as const,
-    position: 'relative' as const,
-    paddingTop: 20,
-    paddingBottom: 20,
-    minHeight: 168,
-    justifyContent: 'center' as const,
-  },
-  floatingPill: {
-    position: 'absolute' as const,
-    flexDirection: 'row' as const,
-    alignItems: 'center' as const,
-    gap: 4,
-    backgroundColor: 'rgba(255,107,74,0.1)',
-    paddingHorizontal: 9,
-    paddingVertical: 5,
-    borderRadius: 16,
-    zIndex: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  floatingPillTopLeft: {
-    top: 2,
-    left: 2,
-    transform: [{ rotate: '-5deg' }],
-  },
-  floatingPillTopRight: {
-    top: 6,
-    right: 4,
-    transform: [{ rotate: '4deg' }],
-  },
-  floatingPillLeft: {
-    top: '42%',
-    left: -4,
-    transform: [{ rotate: '-3deg' }],
-  },
-  floatingPillRight: {
-    top: '38%',
-    right: -2,
-    transform: [{ rotate: '5deg' }],
-  },
-  floatingPillBottomLeft: {
-    bottom: 2,
-    left: 8,
-    transform: [{ rotate: '3deg' }],
-  },
-  floatingPillBottomRight: {
-    bottom: 6,
-    right: 4,
-    transform: [{ rotate: '-4deg' }],
-  },
-  heroTagText: {
-    fontSize: 10,
-    fontWeight: '600' as const,
-    color: colors.primary,
-    letterSpacing: 0.2,
-  },
-  premiumHeroImage: {
-    width: 76,
-    height: 76,
-  },
-  premiumTitleSection: {
-    alignItems: 'center',
-    marginBottom: 28,
-  },
-  premiumTitle: {
-    fontSize: 28,
+  cleanEmptyTitle: {
+    fontSize: 24,
     fontWeight: '800' as const,
     color: colors.text,
-    letterSpacing: -0.8,
-    marginBottom: 10,
-    textAlign: 'center' as const,
+    letterSpacing: -0.5,
+    marginBottom: 8,
   },
-  premiumSubtitle: {
-    fontSize: 16,
+  cleanEmptySubtitle: {
+    fontSize: 15,
     fontWeight: '500' as const,
     color: colors.textSecondary,
     textAlign: 'center' as const,
-    lineHeight: 24,
-    paddingHorizontal: 12,
+    lineHeight: 22,
+    paddingHorizontal: 20,
   },
-  premiumActions: {
-    gap: 12,
-    marginBottom: 24,
-  },
-  premiumActionCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  cleanEmptyActions: {
     backgroundColor: colors.white,
     borderRadius: 20,
-    padding: 18,
+    paddingVertical: 6,
+    paddingHorizontal: 4,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 4,
-    position: 'relative' as const,
-    overflow: 'hidden' as const,
-  },
-  premiumActionGlow: {
-    position: 'absolute' as const,
-    top: -20,
-    right: -20,
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: 'rgba(255,107,53,0.06)',
-  },
-  premiumActionIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  premiumActionContent: {
-    flex: 1,
-  },
-  premiumActionTitle: {
-    fontSize: 17,
-    fontWeight: '700' as const,
-    color: colors.text,
-    marginBottom: 3,
-    letterSpacing: -0.2,
-  },
-  premiumActionSubtext: {
-    fontSize: 14,
-    fontWeight: '500' as const,
-    color: colors.textSecondary,
-  },
-  premiumActionArrow: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255,107,53,0.08)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  premiumStatsCard: {
-    backgroundColor: colors.white,
-    borderRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 12,
     elevation: 3,
   },
-  premiumStatsInner: {
-    flexDirection: 'row',
-    paddingVertical: 22,
-    paddingHorizontal: 12,
+  cleanEmptyActionRow: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
   },
-  premiumStatItem: {
+  cleanEmptyActionIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const,
+    marginRight: 14,
+  },
+  cleanEmptyActionText: {
     flex: 1,
-    alignItems: 'center',
   },
-  premiumStatIconWrap: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    backgroundColor: colors.cardAlt,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  premiumStatValue: {
-    fontSize: 26,
-    fontWeight: '800' as const,
+  cleanEmptyActionTitle: {
+    fontSize: 16,
+    fontWeight: '700' as const,
     color: colors.text,
-    letterSpacing: -0.5,
     marginBottom: 2,
   },
-  premiumStatLabel: {
-    fontSize: 12,
-    fontWeight: '600' as const,
+  cleanEmptyActionSub: {
+    fontSize: 13,
+    fontWeight: '500' as const,
     color: colors.textSecondary,
-    textTransform: 'uppercase' as const,
-    letterSpacing: 0.5,
   },
-  premiumStatDivider: {
-    width: 1,
+  cleanEmptyDivider: {
+    height: 1,
     backgroundColor: colors.borderLight,
-    marginVertical: 8,
+    marginHorizontal: 16,
   },
   featuredCard: {
     marginBottom: 16,
