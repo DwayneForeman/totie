@@ -8,7 +8,8 @@ import { generateObject } from '@rork-ai/toolkit-sdk';
 import { z } from 'zod';
 import { useApp } from '@/context/AppContext';
 import colors from '@/constants/colors';
-import { Recipe, RecipeMatch, Ingredient } from '@/types';
+import { Recipe, RecipeMatch, Ingredient, FoodDumpItem } from '@/types';
+import RecipeProcessingModal from '@/components/RecipeProcessingModal';
 import PageCoachMarks, { PageCoachStep } from '@/components/PageCoachMarks';
 import PremiumPaywall from '@/components/PremiumPaywall';
 import { styles } from '@/styles/cookNowStyles';
@@ -55,6 +56,11 @@ export default function CookNowTab() {
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [aiRecipe, setAiRecipe] = useState<AIRecipe | null>(null);
   const [showAIRecipeModal, setShowAIRecipeModal] = useState(false);
+  const [savedAIRecipe, setSavedAIRecipe] = useState<Recipe | null>(null);
+  const [showProcessingModal, setShowProcessingModal] = useState(false);
+  const [processingStep, setProcessingStep] = useState<'analyzing' | 'generating' | 'creating-list' | 'done' | 'error'>('analyzing');
+  const [processingError, setProcessingError] = useState<string | null>(null);
+  const [processingItem, setProcessingItem] = useState<FoodDumpItem | null>(null);
   const [aiCookingMode, setAiCookingMode] = useState(false);
   const [aiCurrentStep, setAiCurrentStep] = useState(0);
   const { isPageTutorialComplete, completePageTutorial } = useApp();
@@ -504,9 +510,22 @@ export default function CookNowTab() {
     setIsGeneratingAI(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
+    const ingredientList = pantryItems.map(item => item.name).join(', ');
+    setProcessingItem({
+      id: Date.now().toString(),
+      type: 'note',
+      content: `Recipe from: ${ingredientList.substring(0, 60)}...`,
+      isProcessed: false,
+      createdAt: new Date().toISOString(),
+    });
+    setProcessingStep('analyzing');
+    setProcessingError(null);
+    setSavedAIRecipe(null);
+    setShowProcessingModal(true);
+
     try {
-      const ingredientList = pantryItems.map(item => item.name).join(', ');
-      
+      setProcessingStep('analyzing');
+
       const result = await generateObject({
         messages: [{
           role: 'user',
@@ -522,17 +541,38 @@ Keep instructions clear and beginner-friendly.`
 
       console.log('[CookNow] AI recipe generated:', result.title);
       setAiRecipe(result);
-      setShowAIRecipeModal(true);
-      setAiCookingMode(false);
-      setAiCurrentStep(0);
+      setProcessingStep('generating');
+
+      console.log('[CookNow] Saving AI recipe and generating image...');
+      const recipeData = {
+        title: result.title,
+        image: '',
+        ingredients: result.ingredients as Ingredient[],
+        instructions: result.instructions,
+        prepTime: result.prepTime,
+        cookTime: result.cookTime,
+        servings: result.servings,
+        source: 'AI Kitchen',
+      };
+
+      const saved = await addRecipe(recipeData);
+      setSavedAIRecipe(saved);
+      console.log('[CookNow] AI recipe saved with id:', saved.id);
+
+      setProcessingStep('creating-list');
+      await createGroceryList(`${result.title} Shopping`, [saved.id], [saved]);
+      console.log('[CookNow] Grocery list created for AI recipe');
+
+      setProcessingStep('done');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (error) {
       console.error('[CookNow] AI generation error:', error);
-      Alert.alert('Oops!', 'Could not generate a recipe right now. Please try again.');
+      setProcessingStep('error');
+      setProcessingError('Could not generate a recipe right now. Please try again.');
     } finally {
       setIsGeneratingAI(false);
     }
-  }, [pantryItems]);
+  }, [pantryItems, addRecipe, createGroceryList]);
 
   const closeAIRecipeModal = useCallback(() => {
     setShowAIRecipeModal(false);
@@ -574,8 +614,8 @@ Keep instructions clear and beginner-friendly.`
     if (aiRecipe) {
       addCookedMeal({
         recipeTitle: aiRecipe.title,
-        recipeImage: undefined,
-        recipeId: undefined,
+        recipeImage: savedAIRecipe?.image,
+        recipeId: savedAIRecipe?.id,
         estimatedSavings,
         isAIGenerated: true,
       });
@@ -589,7 +629,7 @@ Keep instructions clear and beginner-friendly.`
         { text: 'View Completed', onPress: () => { closeAIRecipeModal(); setActiveTab('completed'); } },
       ]
     );
-  }, [aiRecipe, updateStats, closeAIRecipeModal, addCookedMeal]);
+  }, [aiRecipe, savedAIRecipe, updateStats, closeAIRecipeModal, addCookedMeal]);
 
   const openSourceUrl = useCallback(() => {
     if (selectedRecipe?.source) {
@@ -689,14 +729,18 @@ Keep instructions clear and beginner-friendly.`
               <TouchableOpacity onPress={closeAIRecipeModal} style={styles.modalCloseBtn}>
                 <X size={24} color={colors.text} strokeWidth={2.5} />
               </TouchableOpacity>
-              <View style={styles.aiModalTitleWrap}>
-                <Wand2 size={16} color={colors.secondary} />
-                <Text style={styles.modalTitle} numberOfLines={1}>AI Generated</Text>
-              </View>
+              <Text style={styles.modalTitle} numberOfLines={1}>{aiRecipe.title}</Text>
               <View style={{ width: 40 }} />
             </View>
 
             <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
+              {savedAIRecipe?.image ? (
+                <Image
+                  source={{ uri: savedAIRecipe.image }}
+                  style={{ width: '100%', height: 220, borderRadius: 0 }}
+                  resizeMode="cover"
+                />
+              ) : null}
               <View style={styles.aiRecipeHeader}>
                 <View style={styles.aiBadge}>
                   <Sparkles size={14} color={colors.white} />
@@ -1132,6 +1176,31 @@ Keep instructions clear and beginner-friendly.`
         </SafeAreaView>
 
         {renderAIRecipeModal()}
+
+        <RecipeProcessingModal
+          visible={showProcessingModal}
+          step={processingStep}
+          item={processingItem}
+          recipe={savedAIRecipe}
+          error={processingError}
+          onClose={() => {
+            setShowProcessingModal(false);
+            setProcessingStep('analyzing');
+            setProcessingError(null);
+          }}
+          onViewRecipe={() => {
+            setShowProcessingModal(false);
+            if (aiRecipe) {
+              setShowAIRecipeModal(true);
+              setAiCookingMode(false);
+              setAiCurrentStep(0);
+            }
+          }}
+          onGoToGroceryList={() => {
+            setShowProcessingModal(false);
+            router.push({ pathname: '/(tabs)/kitchen', params: { tab: 'grocery' } });
+          }}
+        />
 
         <PageCoachMarks
           visible={showPageTutorial}
