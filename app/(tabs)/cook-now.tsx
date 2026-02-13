@@ -10,6 +10,7 @@ import { useApp } from '@/context/AppContext';
 import colors from '@/constants/colors';
 import { Recipe, RecipeMatch, Ingredient, FoodDumpItem } from '@/types';
 import RecipeProcessingModal from '@/components/RecipeProcessingModal';
+import { generateRecipeImage } from '@/utils/generateRecipeImage';
 import PageCoachMarks, { PageCoachStep } from '@/components/PageCoachMarks';
 import PremiumPaywall from '@/components/PremiumPaywall';
 import { styles } from '@/styles/cookNowStyles';
@@ -543,10 +544,14 @@ Keep instructions clear and beginner-friendly.`
       setAiRecipe(result);
       setProcessingStep('generating');
 
-      console.log('[CookNow] Saving AI recipe and generating image...');
+      console.log('[CookNow] Generating AI image for recipe — waiting for completion...');
+      const imageUri = await generateRecipeImage(result.title, result.ingredients);
+      console.log('[CookNow] Image generation complete:', imageUri ? 'success' : 'failed');
+
+      console.log('[CookNow] Saving AI recipe with image...');
       const recipeData = {
         title: result.title,
-        image: '',
+        image: imageUri || '',
         ingredients: result.ingredients as Ingredient[],
         instructions: result.instructions,
         prepTime: result.prepTime,
@@ -557,7 +562,7 @@ Keep instructions clear and beginner-friendly.`
 
       const saved = await addRecipe(recipeData);
       setSavedAIRecipe(saved);
-      console.log('[CookNow] AI recipe saved with id:', saved.id);
+      console.log('[CookNow] AI recipe saved with id:', saved.id, 'image:', saved.image ? 'yes' : 'no');
 
       setProcessingStep('creating-list');
       await createGroceryList(`${result.title} Shopping`, [saved.id], [saved]);
@@ -1730,6 +1735,31 @@ Keep instructions clear and beginner-friendly.`
 
         {renderRecipeModal()}
         {renderAIRecipeModal()}
+
+        <RecipeProcessingModal
+          visible={showProcessingModal}
+          step={processingStep}
+          item={processingItem}
+          recipe={savedAIRecipe}
+          error={processingError}
+          onClose={() => {
+            setShowProcessingModal(false);
+            setProcessingStep('analyzing');
+            setProcessingError(null);
+          }}
+          onViewRecipe={() => {
+            setShowProcessingModal(false);
+            if (aiRecipe) {
+              setShowAIRecipeModal(true);
+              setAiCookingMode(false);
+              setAiCurrentStep(0);
+            }
+          }}
+          onGoToGroceryList={() => {
+            setShowProcessingModal(false);
+            router.push({ pathname: '/(tabs)/kitchen', params: { tab: 'grocery' } });
+          }}
+        />
 
         <Modal
           visible={showAddRecipe}
