@@ -397,6 +397,8 @@ const [AppProviderInternal, useApp] = createContextHook(() => {
       console.log('[ImageGen] Starting background image generation for cookbook recipe:', recipe.title);
       generateAndSetRecipeImage(newRecipe.id, recipe.title, recipe.ingredients);
     }
+
+    return newRecipe;
   };
 
   const getCookbookById = (cookbookId: string): Cookbook | undefined => {

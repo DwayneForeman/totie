@@ -93,6 +93,7 @@ export default function RecipeProcessingModal({
   const [progressPercent, setProgressPercent] = useState(0);
   const creepRef = useRef<Animated.CompositeAnimation | null>(null);
   const floatAnimsRef = useRef<{ y: Animated.CompositeAnimation; x: Animated.CompositeAnimation }[]>([]);
+  const prevVisibleRef = useRef(false);
 
   useEffect(() => {
     const id = progress.addListener(({ value }) => {
@@ -100,6 +101,34 @@ export default function RecipeProcessingModal({
     });
     return () => progress.removeListener(id);
   }, [progress]);
+
+  useEffect(() => {
+    if (visible && !prevVisibleRef.current) {
+      progress.stopAnimation();
+      progress.setValue(0);
+      setProgressPercent(0);
+      doneScale.setValue(0);
+      tipOpacity.setValue(1);
+      setTipIndex(0);
+      if (creepRef.current) {
+        creepRef.current.stop();
+        creepRef.current = null;
+      }
+      sparkleAnims.forEach(s => {
+        s.scale.setValue(0);
+        s.opacity.setValue(0);
+        s.translateX.setValue(0);
+        s.translateY.setValue(0);
+      });
+      floatAnims.forEach(a => {
+        a.opacity.setValue(0);
+        a.scale.setValue(0.5);
+        a.translateY.setValue(0);
+        a.translateX.setValue(0);
+      });
+    }
+    prevVisibleRef.current = visible;
+  }, [visible, progress, doneScale, tipOpacity, sparkleAnims, floatAnims]);
 
   useEffect(() => {
     if (visible) {

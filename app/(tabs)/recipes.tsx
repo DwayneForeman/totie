@@ -85,9 +85,9 @@ export default function RecipesTab() {
   const { isPageTutorialComplete, completePageTutorial } = useApp();
   const [showPageTutorial, setShowPageTutorial] = useState(false);
   const [snappedImageUri, setSnappedImageUri] = useState<string | null>(null);
-  const [generatingCookbookId, setGeneratingCookbookId] = useState<string | null>(null);
-  const [cookbookGenProgress, setCookbookGenProgress] = useState<string>('');
-  const [cookbookGenCount, setCookbookGenCount] = useState<number>(0);
+  const [generatingCookbookId] = useState<string | null>(null);
+  const [cookbookGenProgress] = useState<string>('');
+  const [cookbookGenCount] = useState<number>(0);
   const [cookbookPreviewRecipes, setCookbookPreviewRecipes] = useState<{ title: string; description: string; pageNumber?: number }[]>([]);
   const [selectedPreviewIndices, setSelectedPreviewIndices] = useState<Set<number>>(new Set());
   const [showRecipeSelection, setShowRecipeSelection] = useState(false);
@@ -466,11 +466,25 @@ IMPORTANT:
 
     console.log('[Recipes] Generating', selectedTitles.length, 'selected recipes for cookbook:', previewCookbookTitle);
     setShowRecipeSelection(false);
-    setGeneratingCookbookId(previewCookbookId);
-    setCookbookGenProgress('Generating selected recipes...');
-    setCookbookGenCount(0);
+
+    const cookbookItem: FoodDumpItem = {
+      id: `cookbook-${Date.now()}`,
+      type: 'note' as const,
+      content: `${selectedTitles.length} recipe${selectedTitles.length !== 1 ? 's' : ''} from "${previewCookbookTitle}"`,
+      source: previewCookbookTitle,
+      createdAt: new Date().toISOString(),
+      isProcessed: false,
+    };
+    setProcessingItem(cookbookItem);
+    setShowProcessing(true);
+    setProcessingStep('analyzing');
+    setProcessingError(null);
+    setGeneratedRecipe(null);
 
     try {
+      await new Promise(resolve => setTimeout(resolve, 800));
+      setProcessingStep('generating');
+
       const prompt = `You are a cookbook expert. The user owns the cookbook "${previewCookbookTitle}"${previewCookbookAuthor ? ` by ${previewCookbookAuthor}` : ''}.
 
 Generate FULL detailed recipes for these specific recipes from the cookbook:
@@ -489,16 +503,21 @@ IMPORTANT:
       });
 
       console.log('[Recipes] Generated', result.recipes.length, 'full recipes');
+      setProcessingStep('creating-list');
+
+      let lastAddedRecipe: Recipe | null = null;
+      const addedRecipes: Recipe[] = [];
 
       for (let i = 0; i < result.recipes.length; i++) {
         const r = result.recipes[i];
-        setCookbookGenProgress(`Adding: ${r.title}`);
-        setCookbookGenCount(i + 1);
+        console.log('[Recipes] Generating image for cookbook recipe:', r.title, `(${i + 1}/${result.recipes.length})`);
 
-        await addRecipeFromCookbook(
+        const imageUri = await generateRecipeImage(r.title, r.ingredients as { name: string }[]);
+
+        const addedRecipe = await addRecipeFromCookbook(
           {
             title: r.title,
-            image: '',
+            image: imageUri || '',
             ingredients: r.ingredients as Ingredient[],
             instructions: r.instructions,
             prepTime: r.prepTime,
@@ -510,23 +529,34 @@ IMPORTANT:
           previewCookbookId
         );
 
+        if (addedRecipe) {
+          lastAddedRecipe = addedRecipe;
+          addedRecipes.push(addedRecipe);
+        }
+
         await new Promise(resolve => setTimeout(resolve, 200));
       }
 
-      setCookbookGenProgress('Done!');
+      if (lastAddedRecipe) {
+        setGeneratedRecipe(lastAddedRecipe);
+      }
+
+      if (addedRecipes.length > 0) {
+        const listName = addedRecipes.length === 1
+          ? `${addedRecipes[0].title} Shopping`
+          : `${previewCookbookTitle} Shopping`;
+        await createGroceryList(listName, addedRecipes.map(r => r.id), addedRecipes);
+      }
+
+      setProcessingStep('done');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (error) {
       console.error('[Recipes] Error generating cookbook recipes:', error);
-      setCookbookGenProgress('Failed to generate recipes. Tap to retry.');
+      setProcessingStep('error');
+      setProcessingError('Failed to generate recipes. Please try again.');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    } finally {
-      setTimeout(() => {
-        setGeneratingCookbookId(null);
-        setCookbookGenProgress('');
-        setCookbookGenCount(0);
-      }, 1500);
     }
-  }, [previewCookbookId, previewCookbookTitle, previewCookbookAuthor, cookbookPreviewRecipes, selectedPreviewIndices, addRecipeFromCookbook, cookbookRecipesSchemaRef]);
+  }, [previewCookbookId, previewCookbookTitle, previewCookbookAuthor, cookbookPreviewRecipes, selectedPreviewIndices, addRecipeFromCookbook, cookbookRecipesSchemaRef, createGroceryList]);
 
   const togglePreviewRecipe = useCallback((index: number) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
