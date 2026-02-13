@@ -348,10 +348,12 @@ export default function CookNowTab() {
 
   const closeRecipeModal = useCallback(() => {
     setShowRecipeModal(false);
-    setSelectedRecipe(null);
-    setSelectedMatch(null);
     setCookingMode(false);
     setCurrentStep(0);
+    setTimeout(() => {
+      setSelectedRecipe(null);
+      setSelectedMatch(null);
+    }, 400);
   }, []);
 
   const startCooking = useCallback(() => {
@@ -581,9 +583,11 @@ Keep instructions clear and beginner-friendly.`
 
   const closeAIRecipeModal = useCallback(() => {
     setShowAIRecipeModal(false);
-    setAiRecipe(null);
     setAiCookingMode(false);
     setAiCurrentStep(0);
+    setTimeout(() => {
+      setAiRecipe(null);
+    }, 400);
   }, []);
 
   const startAICooking = useCallback(() => {
